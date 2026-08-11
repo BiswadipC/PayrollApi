@@ -26,5 +26,16 @@ namespace Repository.EmployeeType
 
             return employeeTypes;
         } // EmployeeTypeResponse...
+
+        public async Task<EmployeeTypeResponse> GetEmployeeTypeByTypeId(int typeId)
+        {
+            var employeeType = await context.EmployeeTypes.Select(x => new EmployeeTypeResponse()
+            {
+                TypeId = x.TypeId,
+                TypeName = x.TypeName
+            }).FirstOrDefaultAsync(m => m.TypeId == typeId) ?? new EmployeeTypeResponse();
+
+            return employeeType;
+        } // GetEmployeeTypeByTypeId...
     } // class...
 }
