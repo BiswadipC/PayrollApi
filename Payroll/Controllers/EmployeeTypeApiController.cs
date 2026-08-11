@@ -17,6 +17,11 @@ namespace Payroll.Controllers
             this.iet = iet;
         } // constructor...
 
-
+        [HttpGet("")]
+        public async Task<IActionResult> GetEmployeeTypes()
+        {
+            var eTypes = await iet.GetEmployeeTypes();
+            return Ok(eTypes);
+        } // GetEmployeeTypes...
     } // class...
 }
