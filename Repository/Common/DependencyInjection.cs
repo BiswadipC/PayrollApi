@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Repository.Department;
 using Repository.Designation;
+using Repository.EmployeeType;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,6 +15,7 @@ namespace Repository.Common
         {
             service.AddScoped<IDesignation, Repository.Designation.NDesignation.DALClass>();
             service.AddScoped<IDepartment, Repository.Department.DALClass>();
+            service.AddScoped<IEmployeeType, Repository.EmployeeType.NEmployeeType.DALClass>();
         } // AddDependency...
     } // DependencyInjection...
 }
