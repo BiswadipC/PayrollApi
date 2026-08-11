@@ -19,6 +19,8 @@ public partial class PayrollContext : DbContext
 
     public virtual DbSet<Designation> Designations { get; set; }
 
+    public virtual DbSet<EmployeeType> EmployeeTypes { get; set; }
+
     public virtual DbSet<User> Users { get; set; }
 
 //    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -39,6 +41,13 @@ public partial class PayrollContext : DbContext
             entity.HasKey(e => e.IdNo);
 
             entity.HasIndex(e => e.Name, "IX_Designations_Name").IsUnique();
+        });
+
+        modelBuilder.Entity<EmployeeType>(entity =>
+        {
+            entity.HasKey(e => e.TypeId);
+
+            entity.HasIndex(e => e.TypeName, "IX_EmployeeTypes_TypeName").IsUnique();
         });
 
         modelBuilder.Entity<User>(entity =>
