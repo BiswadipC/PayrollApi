@@ -22,8 +22,14 @@ namespace Payroll.Controllers
         [HttpGet("")]
         public async Task<IActionResult> GetEmployeeTypes()
         {
-            var eTypes = await iet.GetEmployeeTypes();
-            return Ok(eTypes);
+            //var eTypes = await iet.GetEmployeeTypes();
+            //return Ok(eTypes);
+
+            return Ok(new
+            {
+                Message = "GitHub Actions deployment test",
+                Version = "GITHUB-ACTIONS-001"
+            });
         } // GetEmployeeTypes...
 
         //[HttpGet("{typeId:int}")]
