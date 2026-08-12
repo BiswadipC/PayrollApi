@@ -54,7 +54,10 @@ namespace Payroll.Controllers
         [HttpGet("testtype")]
         public async Task<IActionResult> TestType()
         {
-            return Ok(new { Message = "Hello From C#" });
+            return Ok(new {
+                Message = "Hello From C#",
+                Version = "OIDC-TEST-001"
+            });
         }
     } // class...
 }
