@@ -2,6 +2,7 @@
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Payroll.Filters.Employeetypes;
 using Repository.EmployeeType;
 
 namespace Payroll.Controllers
@@ -33,6 +34,7 @@ namespace Payroll.Controllers
         } // GetEmployeeTypeByTypeId...
 
         [HttpPost("")]
+        [EmployeeTypeActionFilter]
         public async Task<IActionResult> Save(EmployeeTypeResponse response)
         {
             string str = await iet.Save(response);
