@@ -49,12 +49,20 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/debug/version", () =>
+app.MapGet("/debug/routes", (IEnumerable<EndpointDataSource> dataSources) =>
 {
-    return Results.Ok(new
-    {
-        Version = "DEBUG-001"
-    });
+    var routes = dataSources
+        .SelectMany(ds => ds.Endpoints)
+        .OfType<RouteEndpoint>()
+        .Select(e => new
+        {
+            Route = e.RoutePattern.RawText,
+            DisplayName = e.DisplayName
+        })
+        .OrderBy(x => x.Route)
+        .ToList();
+
+    return Results.Ok(routes);
 });
 
 
