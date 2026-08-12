@@ -48,19 +48,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapGet("/debug/routes", (EndpointDataSource endpointDataSource) =>
-{
-    var routes = endpointDataSource.Endpoints
-        .OfType<RouteEndpoint>()
-        .Select(e => new
-        {
-            Route = e.RoutePattern.RawText,
-            DisplayName = e.DisplayName
-        })
-        .OrderBy(x => x.Route)
-        .ToList();
 
-    return Results.Ok(routes);
+app.MapGet("/debug/version", () =>
+{
+    return Results.Ok(new
+    {
+        Version = "DEBUG-001"
+    });
 });
+
 
 app.Run();
