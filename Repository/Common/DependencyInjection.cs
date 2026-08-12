@@ -14,7 +14,7 @@ namespace Repository.Common
         public static void AddDependency(this IServiceCollection service, IConfiguration configuration)
         {
             service.AddScoped<IDesignation, Repository.Designation.NDesignation.DALClass>();
-            service.AddScoped<IDepartment, Repository.Department.DALClass>();
+            service.AddScoped<IDepartment, Repository.Department.NDepartment.DALClass>();
             service.AddScoped<IEmployeeType, Repository.EmployeeType.NEmployeeType.DALClass>();
         } // AddDependency...
     } // DependencyInjection...
