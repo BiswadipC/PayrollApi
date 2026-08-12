@@ -1,4 +1,5 @@
-﻿using Infrastructure.Models;
+﻿using Domain.EmployeeType;
+using Infrastructure.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.EmployeeType;
@@ -30,5 +31,22 @@ namespace Payroll.Controllers
             var employeeType = await iet.GetEmployeeTypeByTypeId(typeId);
             return Ok(employeeType);
         } // GetEmployeeTypeByTypeId...
+
+        [HttpPost("")]
+        public async Task<IActionResult> Save(EmployeeTypeResponse response)
+        {
+            string str = await iet.Save(response);
+            if(str == "Success")
+            {
+                return Ok(new { Message = str });
+            }
+
+            ModelState.AddModelError("BadRequest", str);
+            var problemDetails = new ValidationProblemDetails(ModelState)
+            {
+                Status = StatusCodes.Status400BadRequest
+            };
+            return new BadRequestObjectResult(problemDetails);
+        } // Save...
     } // class...
 }
