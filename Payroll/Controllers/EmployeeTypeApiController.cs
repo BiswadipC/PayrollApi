@@ -26,7 +26,7 @@ namespace Payroll.Controllers
             return Ok(eTypes);
         } // GetEmployeeTypes...
 
-        [HttpGet("{typeId}")]
+        [HttpGet("{typeId:int}")]
         public async Task<IActionResult> GetEmployeeTypeByTypeId(int typeId)
         {
             var employeeType = await iet.GetEmployeeTypeByTypeId(typeId);
