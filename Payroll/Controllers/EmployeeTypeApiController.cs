@@ -58,6 +58,16 @@ namespace Payroll.Controllers
                 Message = "Hello From C#",
                 Version = "OIDC-TEST-001"
             });
-        }
+        } // TestType...
+
+        [HttpGet("oidctest12345")]
+        public IActionResult OidcTest()
+        {
+            return Ok(new
+            {
+                Message = "Hello From C#",
+                Version = "OIDC-TEST-002"
+            });
+        } // OidcTest...
     } // class...
 }
