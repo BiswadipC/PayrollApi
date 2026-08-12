@@ -26,12 +26,12 @@ namespace Payroll.Controllers
             return Ok(eTypes);
         } // GetEmployeeTypes...
 
-        [HttpGet("{typeId:int}")]
-        public async Task<IActionResult> GetEmployeeTypeByTypeId(int typeId)
-        {
-            var employeeType = await iet.GetEmployeeTypeByTypeId(typeId);
-            return Ok(employeeType);
-        } // GetEmployeeTypeByTypeId...
+        //[HttpGet("{typeId:int}")]
+        //public async Task<IActionResult> GetEmployeeTypeByTypeId(int typeId)
+        //{
+        //    var employeeType = await iet.GetEmployeeTypeByTypeId(typeId);
+        //    return Ok(employeeType);
+        //} // GetEmployeeTypeByTypeId...
 
         [HttpPost("")]
         [EmployeeTypeActionFilter]
