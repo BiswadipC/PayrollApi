@@ -51,7 +51,7 @@ namespace Payroll.Controllers
             return new BadRequestObjectResult(problemDetails);
         } // Save...
 
-        [HttpGet("testtype")]
+        [HttpGet("testtype/t1")]
         public async Task<IActionResult> TestType()
         {
             return Ok(new {
