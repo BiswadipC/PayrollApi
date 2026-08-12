@@ -50,5 +50,11 @@ namespace Payroll.Controllers
             };
             return new BadRequestObjectResult(problemDetails);
         } // Save...
+
+        [HttpGet("testtype")]
+        public async Task<IActionResult> TestType()
+        {
+            return Ok(new { Message = "Hello From C#" });
+        }
     } // class...
 }
