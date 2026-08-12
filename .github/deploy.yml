@@ -12,7 +12,7 @@ permissions:
 env:
   AZURE_WEBAPP_NAME: PayrollApi
   DOTNET_VERSION: '10.0.x'
-  PROJECT_PATH: './PayrollApi/Payroll.csproj'
+  PROJECT_PATH: './Payroll/Payroll.csproj'
   PUBLISH_PATH: './publish'
 
 jobs:
