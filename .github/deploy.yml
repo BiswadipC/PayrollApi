@@ -1,3 +1,4 @@
+# Azure OIDC deployment
 name: Deploy ASP.NET Core API
 
 on:
