@@ -6,41 +6,30 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  id-token: write
-  contents: read
-
 env:
   DOTNET_VERSION: '10.0.x'
   PROJECT_PATH: 'Payroll/Payroll.csproj'
   PUBLISH_PATH: './publish'
-  AZURE_WEBAPP_NAME: 'PayrollApi'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-
-      # 1. Get source code
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 2. Install .NET
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      # 3. Restore dependencies
       - name: Restore
         run: dotnet restore ${{ env.PROJECT_PATH }}
 
-      # 4. Build
       - name: Build
         run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
 
-      # 5. Publish
       - name: Publish
         run: |
           dotnet publish ${{ env.PROJECT_PATH }} \
@@ -48,21 +37,9 @@ jobs:
             --output ${{ env.PUBLISH_PATH }} \
             --no-build
 
-      # 6. Login to Azure using OIDC
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
-          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      # 7. Deploy to Azure App Service
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          app-name: PayrollApi
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
           package: ${{ env.PUBLISH_PATH }}
-
-      # 8. Logout
-      - name: Logout from Azure
-        run: az logout
