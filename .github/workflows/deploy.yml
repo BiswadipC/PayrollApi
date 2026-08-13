@@ -35,12 +35,9 @@ jobs:
         run: dotnet build ${{ env.PROJECT_PATH }} --configuration Release --no-restore
 
       # 5. Publish
-      - name: Publish
-        run: dotnet publish ${{ env.PROJECT_PATH }} \
-          --configuration Release \
-          --output ${{ env.PUBLISH_PATH }} \
-          --no-build
-
+- name: Publish
+  run: dotnet publish ${{ env.PROJECT_PATH }} --configuration Release --output ${{ env.PUBLISH_PATH }} --no-build
+  
       # 6. Deploy to Azure App Service
       - name: Deploy to Azure
         uses: azure/webapps-deploy@v3
