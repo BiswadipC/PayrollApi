@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Repository.BankAndBranches;
 using Repository.Department;
 using Repository.Designation;
 using Repository.EmployeeType;
@@ -16,6 +17,7 @@ namespace Repository.Common
             service.AddScoped<IDesignation, Repository.Designation.NDesignation.DALClass>();
             service.AddScoped<IDepartment, Repository.Department.NDepartment.DALClass>();
             service.AddScoped<IEmployeeType, Repository.EmployeeType.NEmployeeType.DALClass>();
+            service.AddScoped<IBankAndBranches, Repository.BankAndBranches.NBankAndBranches.DALClass>();
         } // AddDependency...
     } // DependencyInjection...
 }

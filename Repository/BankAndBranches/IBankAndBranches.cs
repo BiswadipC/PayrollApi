@@ -5,11 +5,11 @@ using System.Text;
 
 namespace Repository.BankAndBranches
 {
-    public interface BankAndBranches
+    public interface IBankAndBranches
     {
         Task<List<BankResponse>> GetBanks();
         Task<List<BranchResponse>> GetBranchesByBankId(int bankId);
         Task<BankResponse> GetBankByBankId(int bankId);
         Task<string> Save(BankResponse bank);
-    } // BankAndBranches...
+    } // IBankAndBranchess...
 }
