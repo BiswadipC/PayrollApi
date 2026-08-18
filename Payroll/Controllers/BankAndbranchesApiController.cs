@@ -1,6 +1,7 @@
 ﻿using Domain.BankAndBranches;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Payroll.Filters.BankAndBranches;
 using Repository.BankAndBranches;
 
 namespace Payroll.Controllers
@@ -39,6 +40,7 @@ namespace Payroll.Controllers
         } // GetBankByBankId...
 
         [HttpPost("")]
+        [SaveBankAndBranchesActionFilter]
         public async Task<IActionResult> Save(BankResponse response)
         {
             string str = await ibb.Save(response);
