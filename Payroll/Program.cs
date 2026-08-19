@@ -60,20 +60,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapGet("/debug/routes", (IEnumerable<EndpointDataSource> dataSources) =>
+app.MapGet("/debug/cors", (HttpContext context) =>
 {
-    var routes = dataSources
-        .SelectMany(ds => ds.Endpoints)
-        .OfType<RouteEndpoint>()
-        .Select(e => new
-        {
-            Route = e.RoutePattern.RawText,
-            DisplayName = e.DisplayName
-        })
-        .OrderBy(x => x.Route)
-        .ToList();
-
-    return Results.Ok(routes);
+    return Results.Ok(new
+    {
+        message = "CORS-TEST-2026-08-19",
+        origin = context.Request.Headers.Origin.ToString(),
+        time = DateTime.UtcNow
+    });
 });
 
 
