@@ -14,7 +14,7 @@ builder.Services.AddControllers()
 
 builder.Services.AddCors(p => p.AddPolicy("corsapp", options =>
 {
-    options.WithOrigins("http://localhost:4200", "https://payrollui-emh7fvgdb8gtdgbd.centralindia-01.azurewebsites.net")
+    options.WithOrigins("http://localhost:4200", "payrollweb-auhyawetasefa9a5.centralindia-01.azurewebsites.net")
     .AllowAnyHeader()
     .AllowAnyMethod()
     .AllowCredentials();
