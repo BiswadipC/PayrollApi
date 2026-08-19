@@ -12,6 +12,21 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("corsapp", policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:4200",
+                "https://payrollweb-auhyawetasefa9a5.centralindia-01.azurewebsites.net"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 //builder.Services.AddCors(p => p.AddPolicy("corsapp", options =>
 //{
 //    options.WithOrigins("http://localhost:4200", "https://payrollweb-auhyawetasefa9a5.centralindia-01.azurewebsites.net/")
@@ -20,16 +35,16 @@ builder.Services.AddControllers()
 //    .AllowCredentials();
 //}));
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("corsapp", policy =>
-    {
-        policy
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-    });
-});
+//builder.Services.AddCors(options =>
+//{
+//    options.AddPolicy("corsapp", policy =>
+//    {
+//        policy
+//            .AllowAnyOrigin()
+//            .AllowAnyHeader()
+//            .AllowAnyMethod();
+//    });
+//});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
