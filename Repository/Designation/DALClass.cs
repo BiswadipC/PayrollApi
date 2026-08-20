@@ -1,6 +1,7 @@
 ﻿using Domain.Designation;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,10 +13,12 @@ namespace Repository.Designation
         internal class DALClass : IDesignation
         {
             private readonly PayrollContext context;
+            private readonly ILogger<DALClass> logger;
 
-            public DALClass(PayrollContext context)
+            public DALClass(PayrollContext context, ILogger<DALClass> logger)
             {
                 this.context = context;
+                this.logger = logger;
             } // constructor...
 
             public async Task<List<DesignationResponse>> GetDesignations()
@@ -36,6 +39,8 @@ namespace Repository.Designation
                     IdNo = m.IdNo,
                     Name = m.Name
                 }).FirstOrDefaultAsync(x => x.IdNo == id);
+
+                logger.LogInformation("Record fetched against Id {id}", id);
 
                 return designation ?? new DesignationResponse();
             } // GetDesignationById...

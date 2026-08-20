@@ -12,15 +12,17 @@ namespace Payroll.Controllers
     public class DesignationApiController : ControllerBase
     {
         private readonly IDesignation idesignation;
+        private readonly ILogger<DesignationApiController> logger;
 
-        public DesignationApiController(IDesignation idesignation)
+        public DesignationApiController(IDesignation idesignation, ILogger<DesignationApiController> logger)
         {
             this.idesignation = idesignation;
+            this.logger = logger;
         } // DesignationApiController...
 
         [HttpGet("")]
         public async Task<IActionResult> GetDesignations()
-        {
+        {            
             var designations = await idesignation.GetDesignations();
             return Ok(designations);
         } // GetDesignations...
