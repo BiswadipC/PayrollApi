@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Repository.BankAndBranches;
 using Repository.Department;
 using Repository.Designation;
 using System;
@@ -19,6 +20,7 @@ namespace Repository.Common
 
             services.AddScoped<IDesignation, Designation.NDesignation.DALClass>();
             services.AddScoped<IDepartment, Department.NDepartment.DALClass>();
+            services.AddScoped<IBankAndBranches, BankAndBranches.NBankAndBranches.DALClass>();
         } // AddDependencies...
     } // class...
 }

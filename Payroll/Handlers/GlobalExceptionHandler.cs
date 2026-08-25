@@ -34,24 +34,10 @@ namespace Payroll.Handlers
                     await httpContext.Response.WriteAsJsonAsync(notFoundProblemDetails, cancellationToken);
                     return true;
 
-                case ConflictException conflictException:
-                    var conflictProblemDetails = new ProblemDetails()
-                    {
-                        Type = "Conflict Exception",
-                        Status = StatusCodes.Status409Conflict,
-                        Extensions = new Dictionary<string, object?>
-                        {
-                            {"errors", conflictException.errors }
-                        }
-                    };
-                    httpContext.Response.StatusCode = StatusCodes.Status409Conflict;
-                    await httpContext.Response.WriteAsJsonAsync(conflictProblemDetails, cancellationToken);
-                    return true;
-
                 case BadRequestException badRequestException:
-                    var badRequestProblemDetails = new ProblemDetails()
+                    var badRequstProblemDetails = new ProblemDetails()
                     {
-                        Type = "BadRequest Exception",
+                        Type = "Bad Request Exception",
                         Status = StatusCodes.Status400BadRequest,
                         Extensions = new Dictionary<string, object?>
                         {
@@ -59,22 +45,31 @@ namespace Payroll.Handlers
                         }
                     };
                     httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await httpContext.Response.WriteAsJsonAsync(badRequestProblemDetails, cancellationToken);
+                    await httpContext.Response.WriteAsJsonAsync(badRequstProblemDetails, cancellationToken);
+                    return true;
+
+                case UnAuthorizedException unAuthorizedException:
+                    var unAuthorizedProblemDetails = new ProblemDetails()
+                    {
+                        Type = "UnAuthorized Exception",
+                        Status = StatusCodes.Status401Unauthorized,
+                        Extensions = new Dictionary<string, object?>
+                        {
+                            {"errors", unAuthorizedException.errors }
+                        }
+                    };
+                    httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    await httpContext.Response.WriteAsJsonAsync(unAuthorizedProblemDetails, cancellationToken);
                     return true;
 
                 default:
-                    var errors = new Dictionary<string, string[]>
-                    {
-                        {"Unhandled Exception", new[] {exception.Message} }
-                    };
-
                     var problemDetails = new ProblemDetails()
                     {
                         Type = "Internal Server Error",
                         Status = StatusCodes.Status500InternalServerError,
                         Extensions = new Dictionary<string, object?>
                         {
-                            {"errors", errors }
+                            {"errors", new[] {exception.Message} }
                         }
                     };
                     httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;

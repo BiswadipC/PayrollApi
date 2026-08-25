@@ -2,7 +2,6 @@
 using Domain.Designation;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
-using Repository.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -53,14 +52,17 @@ namespace Repository.Designation
 
                 if (string.IsNullOrWhiteSpace(designation.Name))
                 {
-                    errors.Add(GlobalConstantsClass.NotFoundKey, new[] { "Designation Name cannot be blank." });
-                    throw new NotFoundException(errors);
+                    errors.Add(GlobalConstantsClass.BadRequestKey + "1", new[] { "Designation Name cannot be blank." });                    
                 }
 
                 if(context.Designations.Any(m => m.Name.ToUpper() == designation.Name.ToUpper()))
                 {
-                    errors.Add(GlobalConstantsClass.ConflictKey, new[] {$"Designation name \'{designation.Name}\' already exists."} );
-                    throw new ConflictException(errors);
+                    errors.Add(GlobalConstantsClass.BadRequestKey + "2", new[] {$"Designation name \'{designation.Name}\' already exists."} );
+                }
+
+                if(errors.Any())
+                {
+                    throw new BadRequestException(errors);
                 }
 
                 Infrastructure.Models.Designation d = new Infrastructure.Models.Designation();
@@ -75,14 +77,17 @@ namespace Repository.Designation
 
                 if (string.IsNullOrWhiteSpace(designation.Name))
                 {
-                    errors.Add(GlobalConstantsClass.NotFoundKey, new[] { "Designation Name cannot be blank." });
-                    throw new NotFoundException(errors);
+                    errors.Add(GlobalConstantsClass.BadRequestKey + "1", new[] { "Designation Name cannot be blank." });
                 }
 
                 if (context.Designations.Any(m => m.Name.ToUpper() == designation.Name.ToUpper() && m.IdNo != designation.IdNo))
                 {
-                    errors.Add(GlobalConstantsClass.ConflictKey, new[] { $"Designation name \'{designation.Name}\' already exists." });
-                    throw new ConflictException(errors);
+                    errors.Add(GlobalConstantsClass.BadRequestKey + "2", new[] { $"Designation name \'{designation.Name}\' already exists." });
+                }
+
+                if (errors.Any())
+                {
+                    throw new BadRequestException(errors);
                 }
 
                 var existingDesignation = await context.Designations.FirstOrDefaultAsync(m => m.IdNo == designation.IdNo);

@@ -4,13 +4,13 @@ using System.Text;
 
 namespace Domain.Common
 {
-    public class ConflictException : Exception
+    public class UnAuthorizedException : Exception
     {
         public IDictionary<string, string[]> errors = new Dictionary<string, string[]>();
 
-        public ConflictException(IDictionary<string, string[]> errors)
+        public UnAuthorizedException(IDictionary<string, string[]> errors) : base("You are not authorized to use this page")
         {
             this.errors = errors;
         } // constructor...
-    } // ConflictException...
+    } // class...
 }

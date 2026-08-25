@@ -2,7 +2,6 @@
 using Domain.Department;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
-using Repository.Common;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -53,14 +52,17 @@ namespace Repository.Department
 
                 if (string.IsNullOrWhiteSpace(department.Name))
                 {
-                    errors.Add("Not Found", new[] { "Department Name cannot be blank." });
-                    throw new NotFoundException(errors);
+                    errors.Add(GlobalConstantsClass.BadRequestKey + "1", new[] { "Department Name cannot be blank." });                    
                 }
 
                 if(context.Departments.Any(m => m.Name!.ToUpper() == department.Name.ToUpper()))
                 {
-                    errors.Add(GlobalConstantsClass.ConflictKey, new[] { $"Department Name \'{department.Name}\' already exists." });
-                    throw new ConflictException(errors);
+                    errors.Add(GlobalConstantsClass.BadRequestKey + "2", new[] { $"Department Name \'{department.Name}\' already exists." });
+                }
+
+                if (errors.Any())
+                {
+                    throw new BadRequestException(errors);
                 }
 
                 Infrastructure.Models.Department d = new Infrastructure.Models.Department();
@@ -75,14 +77,17 @@ namespace Repository.Department
 
                 if (string.IsNullOrWhiteSpace(department.Name))
                 {
-                    errors.Add(GlobalConstantsClass.NotFoundKey, new[] { "Department Name cannot be blank." });
-                    throw new NotFoundException(errors);
+                    errors.Add(GlobalConstantsClass.BadRequestKey + "1", new[] { "Department Name cannot be blank." });
                 }
 
                 if(context.Departments.Any(m => m.Name!.ToUpper() == department.Name.ToUpper() && m.IdNo != department.IdNo))
                 {
-                    errors.Add(GlobalConstantsClass.ConflictKey, new[] { "Department Name '{department.Name}' already exists." });
-                    throw new ConflictException(errors);
+                    errors.Add(GlobalConstantsClass.BadRequestKey + "2", new[] { "Department Name '{department.Name}' already exists." });
+                }
+
+                if(errors.Any())
+                {
+                    throw new BadRequestException(errors);
                 }
 
                 var existingDepartment = await context.Departments.FirstOrDefaultAsync(m => m.IdNo == department.IdNo);
