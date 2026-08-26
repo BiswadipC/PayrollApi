@@ -6,10 +6,6 @@ namespace Infrastructure.Models;
 
 public partial class PayrollContext : DbContext
 {
-    public PayrollContext()
-    {
-    }
-
     public PayrollContext(DbContextOptions<PayrollContext> options)
         : base(options)
     {
@@ -19,17 +15,17 @@ public partial class PayrollContext : DbContext
 
     public virtual DbSet<Branch> Branches { get; set; }
 
+    public virtual DbSet<Company> Companies { get; set; }
+
     public virtual DbSet<Department> Departments { get; set; }
 
     public virtual DbSet<Designation> Designations { get; set; }
 
     public virtual DbSet<EmployeeType> EmployeeTypes { get; set; }
 
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<SalaryComponent> SalaryComponents { get; set; }
 
-//    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-//        => optionsBuilder.UseSqlite("Data Source=D:\\Projects\\WebApi\\PayrollApi\\Payroll\\Data\\payroll.db");
+    public virtual DbSet<User> Users { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,6 +43,19 @@ public partial class PayrollContext : DbContext
             entity.HasOne(d => d.Bank).WithMany(p => p.Branches)
                 .HasForeignKey(d => d.BankId)
                 .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<Company>(entity =>
+        {
+            entity.HasIndex(e => e.CompanyCode, "IX_Companies_CompanyCode").IsUnique();
+
+            entity.HasIndex(e => e.CompanyName, "IX_Companies_CompanyName").IsUnique();
+
+            entity.Property(e => e.Country).HasDefaultValue("India");
+            entity.Property(e => e.CurrencyCode)
+                .HasDefaultValue("INR")
+                .HasColumnName("currency_code");
+            entity.Property(e => e.Gstin).HasColumnName("GSTIN");
         });
 
         modelBuilder.Entity<Department>(entity =>
@@ -68,6 +77,21 @@ public partial class PayrollContext : DbContext
             entity.HasKey(e => e.TypeId);
 
             entity.HasIndex(e => e.TypeName, "IX_EmployeeTypes_TypeName").IsUnique();
+        });
+
+        modelBuilder.Entity<SalaryComponent>(entity =>
+        {
+            entity.HasKey(e => e.ComponentId);
+
+            entity.HasIndex(e => new { e.CompanyId, e.ComponentCode }, "IX_SalaryComponents_CompanyId_ComponentCode").IsUnique();
+
+            entity.Property(e => e.CalculationType).HasDefaultValue("FIXED");
+            entity.Property(e => e.IsActive).HasDefaultValue("Yes");
+            entity.Property(e => e.Taxable).HasDefaultValueSql("0");
+
+            entity.HasOne(d => d.Company).WithMany(p => p.SalaryComponents)
+                .HasForeignKey(d => d.CompanyId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<User>(entity =>

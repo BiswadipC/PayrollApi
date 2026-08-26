@@ -8,6 +8,7 @@ namespace Domain.SalaryComponent
     {
         public int ComponentId {  get; set; }
         public int CompanyId {  get; set; }
+        public string ComponentCode {  get; set; } = string.Empty;
         public string ComponentName {  get; set; } = string.Empty;
         public string ComponentType { get; set; } = string.Empty;
         public string CalculationType {  get; set; } = string.Empty;
