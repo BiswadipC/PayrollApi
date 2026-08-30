@@ -1,3 +1,4 @@
+using Domain.Users;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
 using Payroll.Handlers;
@@ -33,6 +34,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDependencies(builder.Configuration);
 

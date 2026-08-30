@@ -1,4 +1,5 @@
 ﻿using Domain.Department;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Department;
@@ -18,18 +19,21 @@ namespace Payroll.Controllers
         } // constructor...
 
         [HttpGet("")]
+        [Authorize]
         public async Task<IActionResult> GetDepartments()
         {
             return Ok(await  this.idepartment.GetDepartments());
         } // GetDepartments...
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetDepartmentById(int id)
         {
             return Ok(await idepartment.GetDepartmentById(id));
         } // GetDepartmentById...
 
         [HttpPost("")]
+        [Authorize]
         public async Task<IActionResult> Save(DepartmentResponse response)
         {
             await this.idepartment.Save(response);

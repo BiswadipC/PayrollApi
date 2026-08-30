@@ -62,14 +62,30 @@ namespace Payroll.Handlers
                     await httpContext.Response.WriteAsJsonAsync(unAuthorizedProblemDetails, cancellationToken);
                     return true;
 
-                default:
+                case AccessDeniedException accessDeniedException:
+                    var accessDeniedProblemDetails = new ProblemDetails()
+                    {
+                        Type = "Access Denied Exception",
+                        Status = StatusCodes.Status403Forbidden,
+                        Extensions = new Dictionary<string, object?>
+                        {
+                            {"errors", accessDeniedException.errors }
+                        }
+                    };
+                    httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+                    await httpContext.Response.WriteAsJsonAsync(accessDeniedProblemDetails, cancellationToken);
+                    return true;
+                
+                 default:
+                    var otherErrors = new Dictionary<string, string[]>();
+                    otherErrors.Add(exception.Message, new[] { exception.InnerException!.Message });
                     var problemDetails = new ProblemDetails()
                     {
                         Type = "Internal Server Error",
                         Status = StatusCodes.Status500InternalServerError,
                         Extensions = new Dictionary<string, object?>
                         {
-                            {"errors", new[] {exception.Message} }
+                            {"errors", otherErrors }
                         }
                     };
                     httpContext.Response.StatusCode = StatusCodes.Status500InternalServerError;

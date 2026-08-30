@@ -1,4 +1,5 @@
 ﻿using Domain.BankAndBranches;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.BankAndBranches;
@@ -18,6 +19,7 @@ namespace Payroll.Controllers
         } // constructor...
 
         [HttpGet("")]
+        [Authorize]
         public async Task<IActionResult> GetBanks()
         {
             var banks = await ibb.GetBanks();
@@ -25,6 +27,7 @@ namespace Payroll.Controllers
         } // GetBanks...
 
         [HttpGet("branches/{bankId}")]
+        [Authorize]
         public async Task<IActionResult> GetBranchesByBankId(int bankId)
         {
             var branches = await ibb.GetBranchesByBankId(bankId);
@@ -32,6 +35,7 @@ namespace Payroll.Controllers
         } // GetBranchesByBankId...
 
         [HttpGet("{bankId}")]
+        [Authorize]
         public async Task<IActionResult> GetBankByBankId(int bankId)
         {
             var bank = await ibb.GetBankByBankId(bankId);
@@ -39,6 +43,7 @@ namespace Payroll.Controllers
         } // GetBankByBankId...
 
         [HttpPost("")]
+        [Authorize]
         public async Task<IActionResult> Save(BankResponse bank)
         {
             await ibb.Save(bank);

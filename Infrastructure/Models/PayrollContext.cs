@@ -23,9 +23,17 @@ public partial class PayrollContext : DbContext
 
     public virtual DbSet<EmployeeType> EmployeeTypes { get; set; }
 
+    public virtual DbSet<FinYear> FinYears { get; set; }
+
+    public virtual DbSet<Module> Modules { get; set; }
+
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+
     public virtual DbSet<SalaryComponent> SalaryComponents { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
+
+    public virtual DbSet<UserModulesPolicyMapping> UserModulesPolicyMappings { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -79,6 +87,31 @@ public partial class PayrollContext : DbContext
             entity.HasIndex(e => e.TypeName, "IX_EmployeeTypes_TypeName").IsUnique();
         });
 
+        modelBuilder.Entity<FinYear>(entity =>
+        {
+            entity.HasKey(e => e.YaarId);
+
+            entity.ToTable("FinYear");
+
+            entity.Property(e => e.FromDate).HasColumnType("date");
+            entity.Property(e => e.ToDate).HasColumnType("date");
+        });
+
+        modelBuilder.Entity<Module>(entity =>
+        {
+            entity.HasKey(e => e.ModuleName);
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.HasKey(e => e.IdNo);
+
+            entity.ToTable("RefreshToken");
+
+            entity.Property(e => e.ExpiresAt).HasColumnType("datetime");
+            entity.Property(e => e.UserId).HasColumnType("INT");
+        });
+
         modelBuilder.Entity<SalaryComponent>(entity =>
         {
             entity.HasKey(e => e.ComponentId);
@@ -97,6 +130,23 @@ public partial class PayrollContext : DbContext
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasIndex(e => e.UserName, "IX_Users_UserName").IsUnique();
+
+            entity.Property(e => e.IsAdmin).HasDefaultValue("No");
+        });
+
+        modelBuilder.Entity<UserModulesPolicyMapping>(entity =>
+        {
+            entity.HasKey(e => e.IdNo);
+
+            entity.ToTable("UserModulesPolicyMapping");
+
+            entity.HasOne(d => d.ModuleNameNavigation).WithMany(p => p.UserModulesPolicyMappings)
+                .HasForeignKey(d => d.ModuleName)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.User).WithMany(p => p.UserModulesPolicyMappings)
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         OnModelCreatingPartial(modelBuilder);

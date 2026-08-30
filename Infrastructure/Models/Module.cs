@@ -3,15 +3,9 @@ using System.Collections.Generic;
 
 namespace Infrastructure.Models;
 
-public partial class User
+public partial class Module
 {
-    public int UserId { get; set; }
-
-    public string UserName { get; set; } = null!;
-
-    public string Password { get; set; } = null!;
-
-    public string IsAdmin { get; set; } = null!;
+    public string ModuleName { get; set; } = null!;
 
     public virtual ICollection<UserModulesPolicyMapping> UserModulesPolicyMappings { get; set; } = new List<UserModulesPolicyMapping>();
 }

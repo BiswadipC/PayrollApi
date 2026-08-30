@@ -1,4 +1,5 @@
 ﻿using Domain.Designation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.Designation;
@@ -18,18 +19,21 @@ namespace Payroll.Controllers
         } // constructor...
 
         [HttpGet("")]
+        [Authorize]
         public async Task<IActionResult> GetDesignations()
         {
             return Ok(await idesignation.GetDesignations());
         } // GetDesignations...
 
         [HttpGet("{id}")]
+        [Authorize]
         public async Task<IActionResult> GetDesignationById(int id)
         {
             return Ok(await idesignation.GetDesignationById(id));
         } // GetDesignationById...
 
         [HttpPost("")]
+        [Authorize]
         public async Task<IActionResult> Save(DesignationResponse response)
         {
             await idesignation.Save(response);

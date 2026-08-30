@@ -1,4 +1,5 @@
 ﻿using Domain.SalaryComponent;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Repository.SalaryComponent;
@@ -18,18 +19,21 @@ namespace Payroll.Controllers
         } // constructor...
 
         [HttpGet("")]
+        [Authorize]
         public async Task<IActionResult> GetSalaryComponents()
         {
             return Ok(await isc.GetSalaryComponents());
         } // GetSalaryComponents...
 
         [HttpGet("{componentId}")]
+        [Authorize]
         public async Task<IActionResult> GetSalaryComponentByComponentId(int componentId)
         {
             return Ok(await isc.GetSalaryComponentByComponentId(componentId));
         } // GetSalaryComponentByComponentId...
 
         [HttpPost("")]
+        [Authorize]
         public async Task<IActionResult> Save(SalaryComponentResponse response)
         {
             await isc.Save(response);
