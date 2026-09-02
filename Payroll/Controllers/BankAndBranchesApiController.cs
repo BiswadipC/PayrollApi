@@ -19,7 +19,7 @@ namespace Payroll.Controllers
         } // constructor...
 
         [HttpGet("")]
-        [Authorize]
+        [Authorize(Policy = "BANK-View")]
         public async Task<IActionResult> GetBanks()
         {
             var banks = await ibb.GetBanks();
@@ -35,7 +35,7 @@ namespace Payroll.Controllers
         } // GetBranchesByBankId...
 
         [HttpGet("{bankId}")]
-        [Authorize]
+        [Authorize(Policy = "BANK-Edit")]
         public async Task<IActionResult> GetBankByBankId(int bankId)
         {
             var bank = await ibb.GetBankByBankId(bankId);
@@ -43,7 +43,7 @@ namespace Payroll.Controllers
         } // GetBankByBankId...
 
         [HttpPost("")]
-        [Authorize]
+        [Authorize(Policy = "BANK-Edit")]
         public async Task<IActionResult> Save(BankResponse bank)
         {
             await ibb.Save(bank);

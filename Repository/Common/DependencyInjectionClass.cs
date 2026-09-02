@@ -51,7 +51,35 @@ namespace Repository.Common
                     }
                 };
             });
-            services.AddAuthorization();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("DESIGNATION-View", policy =>
+                {
+                    policy.RequireClaim("DESIGNATION-View", "View");
+                });
+                options.AddPolicy("DESIGNATION-Edit", policy =>
+                {
+                    policy.RequireClaim("DESIGNATION-Edit", "Edit");
+                });
+
+                options.AddPolicy("BANK-View", policy =>
+                {
+                    policy.RequireClaim("BANK-View", "View");
+                });
+                options.AddPolicy("BANK-Edit", policy =>
+                {
+                    policy.RequireClaim("BANK-Edit", "Edit");
+                });
+
+                options.AddPolicy("SALARY COMPONENT-View", policy =>
+                {
+                    policy.RequireClaim("SALARY COMPONENT-View", "View");
+                });
+                options.AddPolicy("SALARY COMPONENT-Edit", policy =>
+                {
+                    policy.RequireClaim("SALARY COMPONENT-Edit", "Edit");
+                });
+            });
 
             services.AddScoped<IDesignation, Designation.NDesignation.DALClass>();
             services.AddScoped<IDepartment, Department.NDepartment.DALClass>();

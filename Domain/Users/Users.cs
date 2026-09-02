@@ -32,4 +32,20 @@ namespace Domain.Users
         public string PolicyName { get; set; } = string.Empty;
         public string PermissionType { get; set; } = string.Empty;
     } // class...
+
+    public class UserClaims
+    {
+        public string PolicyName { get; set; } = string.Empty;
+        public string PermissionType { get; set; } = string.Empty;
+    } // UserClaims...
+
+    public class UserCompanyProfileClass
+    {
+        public int UserId { get; set; }
+        public string UserName { get; set; } = string.Empty;
+        public string IsAdmin { get; set; } = string.Empty;
+        public int companyId { get; set; }
+        public string DateFrom { get; set; } = string.Empty;
+        public string DateTo { get; set; } = string.Empty;
+    } // UserCompanyProfileClass class...
 }

@@ -42,18 +42,42 @@ namespace Payroll.Controllers
         {
             string access_token = await iuser.CreateJWTWithCompanyFinYearSelection(username, companyId, dateFrom, dateTo, options);
             string refresh_token = await iuser.CreateRefreshToken(options);
-            await iuser.UpdateRefreshTokenInDatabase(username, refresh_token, DateTime.UtcNow.AddDays(options.Value.RefreshTokenExpirationDays));
+            await iuser.UpdateRefreshTokenInDatabase(username, refresh_token, DateTime.UtcNow.AddDays(options.Value.RefreshTokenExpirationDays),
+                        companyId, dateFrom, dateTo);
 
             return Ok(new { Message = "Success" });
         } // CreateJWTWithCompanyFinYearSelection...
 
         [HttpPost("Refresh")]
-        [Authorize]
+        [AllowAnonymous]
         public async Task<IActionResult> Refresh(string username, int companyId, string dateFrom, string dateTo, IOptions<JWTOptionsClass> options)
         {
             await iuser.Refresh(username, companyId, dateFrom, dateTo, options);
-            return Ok(new { Message = "Success" });
+            return Ok(new {Message = "Success"});
         } // Refresh...
+
+        [HttpGet("UserProfile")]
+        [Authorize]
+        public async Task<IActionResult> GetUserProfileAfterLogin()
+        {
+            var userCompanyProfile = await iuser.GetUserProfileAfterLogin();
+            return Ok(userCompanyProfile);
+        } // GetUserProfileAfterLogin...
+
+        [HttpGet("IsLoggdIn")]
+        [Authorize]
+        public async Task<IActionResult> IsLoggedIn()
+        {
+            return Ok(iuser.IsLoggedIn());
+        } // IsLoggedIn...
+
+        [HttpGet("GetUserClaims/{username}")]
+        [Authorize]
+        public async Task<IActionResult> GetUserClaims(string username)
+        {
+            var userClaims = await iuser.GetUserClaims(username);
+            return Ok(userClaims);
+        } // GetUserClaims...
 
         [HttpPost("logout")]
         [Authorize]

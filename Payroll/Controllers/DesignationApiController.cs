@@ -19,21 +19,23 @@ namespace Payroll.Controllers
         } // constructor...
 
         [HttpGet("")]
-        [Authorize]
+        [Authorize(Policy = "DESIGNATION-View")]
         public async Task<IActionResult> GetDesignations()
         {
+            string token = HttpContext.Request.Headers["TestHeader"].FirstOrDefault() ?? string.Empty;
             return Ok(await idesignation.GetDesignations());
         } // GetDesignations...
 
         [HttpGet("{id}")]
-        [Authorize]
+        [Authorize(Policy = "DESIGNATION-Edit")]
+
         public async Task<IActionResult> GetDesignationById(int id)
         {
             return Ok(await idesignation.GetDesignationById(id));
         } // GetDesignationById...
 
         [HttpPost("")]
-        [Authorize]
+        [Authorize(Policy = "DESIGNATION-Edit")]
         public async Task<IActionResult> Save(DesignationResponse response)
         {
             await idesignation.Save(response);

@@ -248,8 +248,7 @@ namespace Repository.Users
                     {
                         HttpOnly = true,
                         Secure = true,
-                        SameSite = SameSiteMode.None,
-                        Expires = expiresAt
+                        SameSite = SameSiteMode.None
                     });
 
                     return token;
@@ -277,7 +276,7 @@ namespace Repository.Users
                 return refreshToken;
             } // CreateRefreshToken...
             
-            public async Task UpdateRefreshTokenInDatabase(string username, string token, DateTime expiresAt)
+            public async Task UpdateRefreshTokenInDatabase(string username, string token, DateTime expiresAt, int companyId, string dateFrom, string dateTo)
             {
                 var trans = await context.Database.BeginTransactionAsync();
 
@@ -285,6 +284,8 @@ namespace Repository.Users
                 {
                     /*************************** check existing tokens *****************************************/
                     var userResponse = await GetUserByUserName(username);
+
+                    string isAdmin = userResponse.IsAdmin;
 
                     var existingTokens = await context.RefreshTokens.Where(m => m.UserId == userResponse.UserId && m.IsValid == "Yes").ToListAsync();
                     foreach(var data in existingTokens)
@@ -298,6 +299,11 @@ namespace Repository.Users
                     rt.Token = token;
                     rt.IsValid = "Yes";
                     rt.ExpiresAt = expiresAt;
+                    rt.UserName = username;
+                    rt.CompanyId = companyId;
+                    rt.DateFrom = dateFrom;
+                    rt.DateTo = dateTo;
+                    rt.IsAdmin = isAdmin;
                     await context.RefreshTokens.AddAsync(rt);
                     await context.SaveChangesAsync();
 
@@ -344,6 +350,44 @@ namespace Repository.Users
                 await CreateJWTWithCompanyFinYearSelection(username, companyId, dateFrom, dateTo, options);
             } // Refresh...
             
+            public async Task<UserCompanyProfileClass> GetUserProfileAfterLogin()
+            {
+                int userId = Convert.ToInt32(httpContextAccessor.HttpContext!.User.FindFirst("UserId")!.Value);
+                string username = httpContextAccessor.HttpContext.User.FindFirst("UserName")!.Value;
+                string isAdmin = httpContextAccessor.HttpContext.User.FindFirst("IsAdmin")!.Value;
+                int companyId = Convert.ToInt32(httpContextAccessor.HttpContext!.User.FindFirst("CompanyId")!.Value);
+                string dateFrom = httpContextAccessor.HttpContext.User.FindFirst("DateFrom")!.Value;
+                string dateTo = httpContextAccessor.HttpContext.User.FindFirst("DateTo")!.Value;
+
+                var userProfile = new UserCompanyProfileClass()
+                {
+                    UserId = userId,
+                    UserName = username,
+                    IsAdmin = isAdmin,
+                    companyId = companyId,
+                    DateFrom = dateFrom,
+                    DateTo = dateTo
+                };
+
+                return userProfile;
+            } // GetUserProfileAfterLogin...
+
+            public async Task<List<UserClaims>> GetUserClaims(string username)
+            {
+                var userCliams = await context.UserModulesPolicyMappings.Where(x => x.UserName == username).Select(m => new UserClaims()
+                {
+                    PolicyName = m.PolicyName,
+                    PermissionType = m.PermissionType
+                }).ToListAsync();
+
+                return userCliams;
+            } // GetUserClaims...
+
+            public async Task<bool> IsLoggedIn()
+            {
+                return httpContextAccessor.HttpContext!.User.Identity!.IsAuthenticated;
+            } // IsLoggedIn...
+
             public async Task LogOut()
             {
                 httpContextAccessor.HttpContext!.Response.Cookies.Delete("JWT", new CookieOptions()
