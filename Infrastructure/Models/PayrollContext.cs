@@ -21,6 +21,14 @@ public partial class PayrollContext : DbContext
 
     public virtual DbSet<Designation> Designations { get; set; }
 
+    public virtual DbSet<Employee> Employees { get; set; }
+
+    public virtual DbSet<EmployeeBankAccount> EmployeeBankAccounts { get; set; }
+
+    public virtual DbSet<EmployeeSalaryComponent> EmployeeSalaryComponents { get; set; }
+
+    public virtual DbSet<EmployeeSalaryStructure> EmployeeSalaryStructures { get; set; }
+
     public virtual DbSet<EmployeeType> EmployeeTypes { get; set; }
 
     public virtual DbSet<FinYear> FinYears { get; set; }
@@ -71,6 +79,8 @@ public partial class PayrollContext : DbContext
             entity.HasKey(e => e.IdNo);
 
             entity.HasIndex(e => e.Name, "IX_Departments_Name").IsUnique();
+
+            entity.Property(e => e.IdNo).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<Designation>(entity =>
@@ -78,6 +88,97 @@ public partial class PayrollContext : DbContext
             entity.HasKey(e => e.IdNo);
 
             entity.HasIndex(e => e.Name, "IX_Designations_Name").IsUnique();
+        });
+
+        modelBuilder.Entity<Employee>(entity =>
+        {
+            entity.HasIndex(e => new { e.CompanyId, e.EmployeeCode }, "IX_Employees_CompanyId_EmployeeCode").IsUnique();
+
+            entity.Property(e => e.AddressLine1).HasColumnName("address_line1");
+            entity.Property(e => e.AddressLine2).HasColumnName("address_line2");
+            entity.Property(e => e.City).HasColumnName("city");
+            entity.Property(e => e.Country)
+                .HasDefaultValue("India")
+                .HasColumnName("country");
+            entity.Property(e => e.DateOfBirty).HasColumnType("date");
+            entity.Property(e => e.Gender).HasColumnName("gender");
+            entity.Property(e => e.HireDate).HasColumnType("date");
+            entity.Property(e => e.IsActive).HasDefaultValue("Yes");
+            entity.Property(e => e.PostalCode).HasColumnName("postal_code");
+            entity.Property(e => e.State).HasColumnName("state");
+            entity.Property(e => e.TerminationDate).HasColumnType("date");
+
+            entity.HasOne(d => d.Company).WithMany(p => p.Employees)
+                .HasForeignKey(d => d.CompanyId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Designation).WithMany(p => p.Employees).HasForeignKey(d => d.DesignationId);
+
+            entity.HasOne(d => d.Manager).WithMany(p => p.InverseManager).HasForeignKey(d => d.ManagerId);
+        });
+
+        modelBuilder.Entity<EmployeeBankAccount>(entity =>
+        {
+            entity.HasKey(e => e.AccountId);
+
+            entity.HasOne(d => d.Bank).WithMany(p => p.EmployeeBankAccounts)
+                .HasForeignKey(d => d.BankId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Branch).WithMany(p => p.EmployeeBankAccounts)
+                .HasForeignKey(d => d.BranchId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Company).WithMany(p => p.EmployeeBankAccounts).HasForeignKey(d => d.CompanyId);
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.EmployeeBankAccounts).HasForeignKey(d => d.EmployeeId);
+        });
+
+        modelBuilder.Entity<EmployeeSalaryComponent>(entity =>
+        {
+            entity.HasKey(e => e.SalaryComponentId);
+
+            entity.Property(e => e.Amount)
+                .HasDefaultValueSql("0")
+                .HasColumnType("NUMERIC");
+
+            entity.HasOne(d => d.Company).WithMany(p => p.EmployeeSalaryComponents)
+                .HasForeignKey(d => d.CompanyId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Component).WithMany(p => p.EmployeeSalaryComponents)
+                .HasForeignKey(d => d.ComponentId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.EmployeeSalaryComponents)
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+        });
+
+        modelBuilder.Entity<EmployeeSalaryStructure>(entity =>
+        {
+            entity.HasKey(e => e.StructureId);
+
+            entity.Property(e => e.AnnualCtc)
+                .HasDefaultValueSql("0")
+                .HasColumnType("NUMERIC")
+                .HasColumnName("AnnualCTC");
+            entity.Property(e => e.Basic)
+                .HasDefaultValueSql("0")
+                .HasColumnType("NUMERIC");
+            entity.Property(e => e.CompanyId).HasColumnName("companyId");
+            entity.Property(e => e.EffectiveFrom).HasColumnType("date");
+            entity.Property(e => e.EffectiveTo).HasColumnType("date");
+            entity.Property(e => e.IsActive).HasDefaultValue("Yes");
+            entity.Property(e => e.PayFrequency).HasDefaultValue("MONTHLY");
+
+            entity.HasOne(d => d.Company).WithMany(p => p.EmployeeSalaryStructures)
+                .HasForeignKey(d => d.CompanyId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
+
+            entity.HasOne(d => d.Employee).WithMany(p => p.EmployeeSalaryStructures)
+                .HasForeignKey(d => d.EmployeeId)
+                .OnDelete(DeleteBehavior.ClientSetNull);
         });
 
         modelBuilder.Entity<EmployeeType>(entity =>

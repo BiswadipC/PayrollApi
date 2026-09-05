@@ -22,4 +22,6 @@ public partial class SalaryComponent
     public string IsActive { get; set; } = null!;
 
     public virtual Company Company { get; set; } = null!;
+
+    public virtual ICollection<EmployeeSalaryComponent> EmployeeSalaryComponents { get; set; } = new List<EmployeeSalaryComponent>();
 }

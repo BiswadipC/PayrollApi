@@ -20,4 +20,6 @@ public partial class Branch
     public int BankId { get; set; }
 
     public virtual Bank Bank { get; set; } = null!;
+
+    public virtual ICollection<EmployeeBankAccount> EmployeeBankAccounts { get; set; } = new List<EmployeeBankAccount>();
 }

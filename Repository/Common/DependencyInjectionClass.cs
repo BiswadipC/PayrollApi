@@ -1,6 +1,7 @@
 ﻿using Domain.Users;
 using Infrastructure.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,10 +10,12 @@ using Repository.BankAndBranches;
 using Repository.CompanyAndFinYear;
 using Repository.Department;
 using Repository.Designation;
+using Repository.EmployeesManagement;
 using Repository.SalaryComponent;
 using Repository.Users;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Text;
 
 namespace Repository.Common
@@ -22,6 +25,7 @@ namespace Repository.Common
         public static void AddDependencies(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<PayrollContext>(options => options.UseSqlite(configuration.GetConnectionString("SqlConnection")));
+            services.AddScoped<IDbConnection>(db => new SqlConnection(configuration.GetConnectionString("SqlConnection")));
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
             {
@@ -89,6 +93,7 @@ namespace Repository.Common
             services.Configure<JWTOptionsClass>(configuration.GetSection("JWT"));
 
             services.AddScoped<ICompanyAndFinYear, CompanyAndFinYear.NCompanyAndFinYear.DALClass>();
+            services.AddScoped<IEmployeeManagement, EmployeesManagement.NEmployeesManagement.DALClass>();
         } // AddDependencies...
     } // class...
 }

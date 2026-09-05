@@ -29,5 +29,13 @@ public partial class Company
 
     public string? CurrencyCode { get; set; }
 
+    public virtual ICollection<EmployeeBankAccount> EmployeeBankAccounts { get; set; } = new List<EmployeeBankAccount>();
+
+    public virtual ICollection<EmployeeSalaryComponent> EmployeeSalaryComponents { get; set; } = new List<EmployeeSalaryComponent>();
+
+    public virtual ICollection<EmployeeSalaryStructure> EmployeeSalaryStructures { get; set; } = new List<EmployeeSalaryStructure>();
+
+    public virtual ICollection<Employee> Employees { get; set; } = new List<Employee>();
+
     public virtual ICollection<SalaryComponent> SalaryComponents { get; set; } = new List<SalaryComponent>();
 }

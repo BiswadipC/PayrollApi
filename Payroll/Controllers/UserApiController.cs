@@ -53,7 +53,7 @@ namespace Payroll.Controllers
         public async Task<IActionResult> Refresh(string username, int companyId, string dateFrom, string dateTo, IOptions<JWTOptionsClass> options)
         {
             await iuser.Refresh(username, companyId, dateFrom, dateTo, options);
-            return Ok(new {Message = "Success"});
+            return Ok(new { Message = "Success" });
         } // Refresh...
 
         [HttpGet("UserProfile")]

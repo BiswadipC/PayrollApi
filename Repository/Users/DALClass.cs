@@ -203,77 +203,60 @@ namespace Repository.Users
 
             public async Task<string> CreateJWTWithCompanyFinYearSelection(string username, int companyId, string dateFrom, string dateTo, IOptions<JWTOptionsClass> options)
             {
-                try
+                SigningCredentials credentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Value.SecretKey)),
+                            SecurityAlgorithms.HmacSha256Signature);
+
+                List<Claim> claims = new List<Claim>();
+                var userResponse = await GetUserByUserName(username);
+
+                claims.Add(new Claim("UserId", userResponse.UserId.ToString()));
+                claims.Add(new Claim("UserName", username));
+                claims.Add(new Claim("DateFrom", dateFrom));
+                claims.Add(new Claim("DateTo", dateTo));
+                claims.Add(new Claim("CompanyId", companyId.ToString()));
+                claims.Add(new Claim("IsAdmin", userResponse.IsAdmin));
+
+                foreach(var data in context.UserModulesPolicyMappings.Where(m => m.UserId == userResponse.UserId))
                 {
-                    string issuer = options.Value.Issuer;
-                    string audiance = options.Value.Audience;
-                    string key = options.Value.SecretKey;
-                    int JWTExpirationMinutes = options.Value.AccessTokenExpirationMinutes;
-                    
-                    var userResponse = await GetUserByUserName(username);
-                    DateTime expiresAt = DateTime.UtcNow.AddMinutes(JWTExpirationMinutes);
-
-                    SigningCredentials credentials = new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
-                                SecurityAlgorithms.HmacSha256Signature);
-
-                    List<Claim> claims = new List<Claim>();
-                    claims.Add(new Claim("UserId", userResponse.UserId.ToString()));
-                    claims.Add(new Claim("UserName", userResponse.UserName.ToString()));
-                    claims.Add(new Claim("IsAdmin", userResponse.IsAdmin.ToString()));
-                    claims.Add(new Claim("CompanyId", companyId.ToString()));
-                    claims.Add(new Claim("DateFrom", dateFrom));
-                    claims.Add(new Claim("DateTo", dateTo));
-
-                    foreach (var data in context.UserModulesPolicyMappings.Where(X => X.UserId == userResponse.UserId))
-                    {
-                        claims.Add(new Claim(data.PolicyName, data.PermissionType));
-                    }
-
-                    ClaimsIdentity identity = new ClaimsIdentity(claims);
-
-                    SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor()
-                    {
-                        SigningCredentials = credentials,
-                        Subject = identity,
-                        Issuer = issuer,
-                        Audience = audiance,
-                        Expires = expiresAt,
-                        NotBefore = DateTime.UtcNow
-                    };
-
-                    JsonWebTokenHandler handler = new JsonWebTokenHandler();
-                    string token = handler.CreateToken(descriptor);
-
-                    httpContextAccessor.HttpContext!.Response.Cookies.Append("JWT", token, new CookieOptions()
-                    {
-                        HttpOnly = true,
-                        Secure = true,
-                        SameSite = SameSiteMode.None
-                    });
-
-                    return token;
+                    claims.Add(new Claim(data.PolicyName, data.PermissionType));
                 }
-                catch(Exception ex)
+                var identity = new ClaimsIdentity(claims);
+
+                SecurityTokenDescriptor descriptor = new SecurityTokenDescriptor()
                 {
-                    throw;
-                }
+                    SigningCredentials = credentials,
+                    Subject = identity,
+                    Expires = DateTime.UtcNow.AddMinutes(options.Value.AccessTokenExpirationMinutes),
+                    Issuer = options.Value.Issuer,
+                    Audience = options.Value.Audience,
+                    NotBefore = DateTime.UtcNow                    
+                };
+
+                JsonWebTokenHandler handler = new JsonWebTokenHandler();
+                string token = handler.CreateToken(descriptor);
+
+                httpContextAccessor.HttpContext!.Response.Cookies.Append("JWT", token, new CookieOptions()
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None                   
+                });
+
+                return token;
             } // CreateJWTWithCompanyFinYearSelection...
 
             public async Task<string> CreateRefreshToken(IOptions<JWTOptionsClass> options)
             {
-                int RTExpirationDays = options.Value.RefreshTokenExpirationDays;
-                DateTime expiresAt = DateTime.UtcNow.AddDays(RTExpirationDays);
-                string refreshToken = Guid.NewGuid().ToString();
-                
-                httpContextAccessor.HttpContext!.Response.Cookies.Append("RT", refreshToken, new CookieOptions()
+                string token = Guid.NewGuid().ToString();
+                httpContextAccessor.HttpContext!.Response.Cookies.Append("RT", token, new CookieOptions()
                 {
                     HttpOnly = true,
                     Secure = true,
                     SameSite = SameSiteMode.None,
-                    Expires = expiresAt
+                    Expires = DateTime.UtcNow.AddDays(options.Value.RefreshTokenExpirationDays)
                 });
 
-                return refreshToken;
+                return token;
             } // CreateRefreshToken...
             
             public async Task UpdateRefreshTokenInDatabase(string username, string token, DateTime expiresAt, int companyId, string dateFrom, string dateTo)
@@ -282,17 +265,14 @@ namespace Repository.Users
 
                 try
                 {
-                    /*************************** check existing tokens *****************************************/
-                    var userResponse = await GetUserByUserName(username);
-
-                    string isAdmin = userResponse.IsAdmin;
-
-                    var existingTokens = await context.RefreshTokens.Where(m => m.UserId == userResponse.UserId && m.IsValid == "Yes").ToListAsync();
-                    foreach(var data in existingTokens)
+                    var rts = await context.RefreshTokens.Where(m => m.UserName == username).ToListAsync();
+                    foreach (var r in rts)
                     {
-                        data.IsValid = "No";                        
+                        context.Remove(r);
                     }
                     await context.SaveChangesAsync();
+
+                    var userResponse = await GetUserByUserName(username);
 
                     RefreshToken rt = new RefreshToken();
                     rt.UserId = userResponse.UserId;
@@ -303,51 +283,51 @@ namespace Repository.Users
                     rt.CompanyId = companyId;
                     rt.DateFrom = dateFrom;
                     rt.DateTo = dateTo;
-                    rt.IsAdmin = isAdmin;
+                    rt.IsAdmin = userResponse.IsAdmin;
                     await context.RefreshTokens.AddAsync(rt);
                     await context.SaveChangesAsync();
 
                     await trans.CommitAsync();
                     await trans.DisposeAsync();
+
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
                     await trans.RollbackAsync();
                     await trans.DisposeAsync();
                     throw;
-                }
+                }               
             } // UpdateRefreshTokenInDatabase...
 
             public async Task Refresh(string username, int companyId, string dateFrom, string dateTo, IOptions<JWTOptionsClass> options)
             {
-                var errors = new Dictionary<string, string[]>();
+                IDictionary<string, string[]> errors = new Dictionary<string, string[]>();
 
-                string rt = httpContextAccessor.HttpContext!.Request.Cookies["RT"] ?? string.Empty;
-                if(string.IsNullOrWhiteSpace(rt))
+                var refreshToken = httpContextAccessor.HttpContext!.Request.Cookies["RT"] ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(refreshToken))
                 {
                     errors.Add(GlobalConstantsClass.UnAuthorizedKey, new[] { GlobalConstantsClass.UnAuthorizedError });
                     throw new UnAuthorizedException(errors);
                 }
 
-                var userResponse = await GetUserByUserName(username);
-                var existingRTInDatabase = await context.RefreshTokens.FirstOrDefaultAsync(m => m.UserId == userResponse.UserId && m.Token == rt && m.IsValid == "Yes");
-                if(existingRTInDatabase == null)
+                var RT = await context.RefreshTokens.Where(x => x.UserName == username && x.CompanyId == companyId && x.Token == refreshToken && x.IsValid == "Yes").FirstOrDefaultAsync();
+                if (RT == null)
                 {
                     errors.Add(GlobalConstantsClass.UnAuthorizedKey, new[] { GlobalConstantsClass.UnAuthorizedError });
                     throw new UnAuthorizedException(errors);
                 }
 
-                if(existingRTInDatabase.ExpiresAt <= DateTime.UtcNow)
+                if (DateTime.UtcNow >= RT.ExpiresAt)
                 {
-                    existingRTInDatabase.IsValid = "No";
-                    context.RefreshTokens.Update(existingRTInDatabase);
+                    RT.IsValid = "No";
+                    context.RefreshTokens.Update(RT);
                     await context.SaveChangesAsync();
 
                     errors.Add(GlobalConstantsClass.UnAuthorizedKey, new[] { GlobalConstantsClass.UnAuthorizedError });
                     throw new UnAuthorizedException(errors);
                 }
 
-                await CreateJWTWithCompanyFinYearSelection(username, companyId, dateFrom, dateTo, options);
+                string token = await CreateJWTWithCompanyFinYearSelection(username, companyId, dateFrom, dateTo, options);
             } // Refresh...
             
             public async Task<UserCompanyProfileClass> GetUserProfileAfterLogin()
