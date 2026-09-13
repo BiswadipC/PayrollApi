@@ -1,0 +1,18 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Application.DTO.SalaryComponent
+{
+    public class SalaryComponentDTO
+    {
+        public int ComponentId { get; set; }
+        public int CompanyId { get; set; }
+        public string ComponentCode { get; set; } = string.Empty;
+        public string ComponentName { get; set; } = string.Empty;
+        public string ComponentType { get; set; } = string.Empty;
+        public string CalculationType { get; set; } = string.Empty;
+        public string Taxable { get; set; } = string.Empty;
+        public string IsActive { get; set; } = string.Empty;
+    } // class...
+}
