@@ -26,6 +26,7 @@ namespace Payroll.Controllers
         } // constructor...
 
         [HttpPost("authenticate-user")]
+        [AllowAnonymous]
         public async Task<IActionResult> AuthenticateUser(AuthenticateUserDTO dto)
         {
             await authenticationService.AuthenticateUser(dto);
@@ -33,6 +34,7 @@ namespace Payroll.Controllers
         } // AuthenticateUser...
 
         [HttpPost("GenerateJWTAfterAuthentication/{companyId:int}/{finYearId:int}/{username:alpha}")]
+        [AllowAnonymous]
         public async Task<IActionResult> GenerateJWTAfterAuthentication(int companyId, int finYearId, string username)
         {
             var companyDTO = await companyService.GetCompanyFinYearByCompanyIdFinYearId(companyId, finYearId);
