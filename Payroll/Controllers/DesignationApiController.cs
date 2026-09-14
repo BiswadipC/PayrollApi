@@ -19,7 +19,7 @@ namespace Payroll.Controllers
         } // constructor...
 
         [HttpGet("")]
-        //[Authorize(Policy = "DESIGNATION-View")]
+        [Authorize(Policy = "DESIGNATION-View")]
         public async Task<IActionResult> GetDesignations()
         {
             var designationsDTO = await service.GetDesignations();
