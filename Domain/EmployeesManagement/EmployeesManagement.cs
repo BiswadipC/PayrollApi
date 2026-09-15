@@ -148,7 +148,7 @@ namespace Domain.EmployeesManagement
             Country = country;
             Pin = pin;
             ListEmployeesBankResponse = listEmployeesBankResponse ?? new List<EmployeesBankResponse>();
-            EmployeesSalaryStructures = employeesSalaryStructures;
+            EmployeesSalaryStructures = employeesSalaryStructures ?? new EmployeesSalaryStructuresResponse();
             ListEmployeeSalaryComponentsResponse = listEmployeeSalaryComponentsResponse ?? new List<EmployeeSalaryComponentsResponse>();
         }
     } // EmployeesMainResponse...
