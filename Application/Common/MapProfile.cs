@@ -1,10 +1,12 @@
 ﻿using Application.DTO.Bank;
 using Application.DTO.Company;
+using Application.DTO.EmployeesManagement;
 using Application.DTO.SalaryComponent;
 using Application.DTO.User;
 using AutoMapper;
 using Domain.Bank;
 using Domain.Company;
+using Domain.EmployeesManagement;
 using Domain.SalaryComponent;
 using Domain.User;
 using System;
@@ -37,6 +39,15 @@ namespace Application.Common
 
             CreateMap<FinYearResponse, FinYearDTO>();
             CreateMap<FinYearDTO, FinYearResponse>();
+
+            CreateMap<EmployeesMainResponse, EmployeesMainDTO>();
+            CreateMap<EmployeesMainDTO, EmployeesMainResponse>();
+            CreateMap<EmployeesBankResponse, EmployeesBankDTO>();
+            CreateMap<EmployeesBankDTO, EmployeesBankResponse>();
+            CreateMap<EmployeesSalaryStructuresResponse, EmployeesSalaryStructuresDTO>();
+            CreateMap<EmployeesSalaryStructuresDTO, EmployeesSalaryStructuresResponse>();
+            CreateMap<EmployeeSalaryComponentsResponse, EmployeeSalaryComponentsDTO>();
+            CreateMap<EmployeeSalaryComponentsDTO, EmployeeSalaryComponentsResponse>();
         } // constructor...
     } // class...
 }

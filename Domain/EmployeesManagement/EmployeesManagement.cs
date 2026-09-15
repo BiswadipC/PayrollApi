@@ -1,4 +1,5 @@
-﻿using Domain.SalaryComponent;
+﻿using Domain.Common;
+using Domain.SalaryComponent;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -7,33 +8,149 @@ namespace Domain.EmployeesManagement
 {
     public class EmployeesMainResponse
     {
-        public int EmployeeId {  get; set; }
-        public int CompanyId {  get; set; }
-        public string EmployeeCode {  get; set; } = string.Empty;
-        public string EmployeeName { get; set; } = string.Empty;
-        public string DOB { get; set; } = string.Empty;
-        public string Gender {  get; set; } = string.Empty;
-        public string? Email {  get; set; } = string.Empty;
-        public string Phone {  get; set; } = string.Empty;
-        public string HireDate {  get; set; } = string.Empty;
-        public string? TerminationDate {  get; set; } = string.Empty;
-        public int EmployeeTypeId {  get; set; }
-        public string EmployeeTypeName {  get; set; } = string.Empty;
-        public int DepartmentId { get; set; }
-        public string DepartmentName { get; set; } = string.Empty;
-        public int DesignationId { get; set; }
-        public string DesignationName { get; set; } = string.Empty;
-        public int? ManagerId { get; set; }
-        public string? ManagerName { get; set; } = string.Empty;
-        public string AddressLine1 {  get; set; } = string.Empty;
-        public string? AddressLine2 { get; set; } = string.Empty;
-        public string? City {  get; set; } = string.Empty;
-        public string? State {  get; set; } = string.Empty;
-        public string Country {  get; set; } = string.Empty;
-        public string Pin {  get; set; } = string.Empty;
-        public List<EmployeesBankResponse> ListEmployeesBankResponse {  get; set; } = new List<EmployeesBankResponse>();
-        public EmployeesSalaryStructuresResponse EmployeesSalaryStructures {  get; set; } = new EmployeesSalaryStructuresResponse();
-        public List<EmployeeSalaryComponentsResponse> ListEmployeeSalaryComponentsResponse { get; set; } = new List<EmployeeSalaryComponentsResponse>();
+        public int EmployeeId {  get; private set; }
+        public int CompanyId {  get; private set; }
+        public string EmployeeCode {  get; private set; } = string.Empty;
+        public string EmployeeName { get; private set; } = string.Empty;
+        public string DOB { get; private set; } = string.Empty;
+        public string Gender {  get; private set; } = string.Empty;
+        public string? Email {  get; private set; } = string.Empty;
+        public string Phone {  get; private set; } = string.Empty;
+        public string HireDate {  get; private set; } = string.Empty;
+        public string? TerminationDate {  get; private set; } = string.Empty;
+        public int? EmployeeTypeId {  get; private set; }
+        public string EmployeeTypeName {  get; private set; } = string.Empty;
+        public int? DepartmentId { get; private set; }
+        public string DepartmentName { get; private set; } = string.Empty;
+        public int? DesignationId { get; private set; }
+        public string DesignationName { get; private set; } = string.Empty;
+        public int? ManagerId { get; private set; }
+        public string? ManagerName { get; private set; } = string.Empty;
+        public string AddressLine1 {  get; private set; } = string.Empty;
+        public string? AddressLine2 { get; private set; } = string.Empty;
+        public string? City {  get; private set; } = string.Empty;
+        public string? State {  get; private set; } = string.Empty;
+        public string Country {  get; private set; } = string.Empty;
+        public string Pin {  get; private set; } = string.Empty;
+        public List<EmployeesBankResponse> ListEmployeesBankResponse {  get; private set; } = new List<EmployeesBankResponse>();
+        public EmployeesSalaryStructuresResponse EmployeesSalaryStructures {  get; private set; } = new EmployeesSalaryStructuresResponse();
+        public List<EmployeeSalaryComponentsResponse> ListEmployeeSalaryComponentsResponse { get; private set; } = new List<EmployeeSalaryComponentsResponse>();
+
+        public EmployeesMainResponse(int employeeId, int companyId, string employeeCode, string employeeName, string dOB, string gender, string? email, 
+            string phone, string hireDate, string? terminationDate, int? employeeTypeId, string employeeTypeName, int? departmentId, string departmentName, int? designationId, 
+            string designationName, int? managerId, string? managerName, string addressLine1, string? addressLine2, string? city, string? state, 
+            string country, string pin, List<EmployeesBankResponse> listEmployeesBankResponse, EmployeesSalaryStructuresResponse employeesSalaryStructures, 
+            List<EmployeeSalaryComponentsResponse> listEmployeeSalaryComponentsResponse)
+        {
+            List<string> errors = new List<string>();
+            /******************************************************************** business rules ***********************************************************************/
+            if(string.IsNullOrWhiteSpace(employeeCode))
+            {
+                errors.Add("Employee Code cannot be blank.");
+            }
+            if (string.IsNullOrWhiteSpace(employeeName))
+            {
+                errors.Add("Employee Name cannot be blank.");
+            }
+            if (string.IsNullOrWhiteSpace(dOB))
+            {
+                errors.Add("Employee \'Date of Birth\' cannot be blank.");
+            }
+            if(!DateOnly.TryParseExact(dOB, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date1))
+            {
+                errors.Add("Invalid value for \'Date of Birth\'");
+            }
+            if(string.IsNullOrWhiteSpace(gender))
+            {
+                errors.Add("Gender is missing.");
+            }
+            if(DateOnly.TryParseExact(hireDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date2))
+            {
+                errors.Add("Invalid value for \'Date of Joining\'");
+            }
+            if(!employeeTypeId.HasValue)
+            {
+                errors.Add("Specify an employee type.");
+            }
+            if(!designationId.HasValue)
+            {
+                errors.Add("Designation cannot be blank.");
+            }
+            if(!departmentId.HasValue)
+            {
+                errors.Add("Department cannot be blank.");
+            }
+
+            if (listEmployeesBankResponse != null && listEmployeesBankResponse.Count() > 0)
+            {
+                foreach (var b in listEmployeesBankResponse)
+                {                    
+                    if(b.BankId == 0)
+                    {
+                        errors.Add("Select a Bank to proceed.");
+                    }
+                    if (b.BranchId == 0)
+                    {
+                        errors.Add("Select a Branch to proceed.");
+                    }
+                    if (string.IsNullOrEmpty(b.AccountNo))
+                    {
+                        errors.Add("Account No. cannot be blank.");
+                    }
+                } // foreach loop...
+            } // end if...
+
+            if(listEmployeeSalaryComponentsResponse != null && listEmployeeSalaryComponentsResponse.Count() > 0)
+            {
+                foreach(var comp in listEmployeeSalaryComponentsResponse)
+                {
+                    if(comp.ComponentId == 0)
+                    {
+                        errors.Add("select a component to proceed.");
+                    }
+                    if(comp.Amount <= 0)
+                    {
+                        errors.Add("Invalid component amount. Enter a valid amount.");
+                    }
+                } // foreach loop...
+            } // end if...
+
+            if(errors.Any())
+            {
+                throw new BadRequestClass(new Dictionary<string, string[]>()
+                {
+                    {GlobalConstantClass.BadRequestKey, errors.ToArray() }
+                });
+            }
+            /***********************************************************************************************************************************************************/
+            EmployeeId = employeeId;
+            CompanyId = companyId;
+            EmployeeCode = employeeCode;
+            EmployeeName = employeeName;
+            DOB = dOB;
+            Gender = gender;
+            Email = email;
+            Phone = phone;
+            HireDate = hireDate;
+            TerminationDate = terminationDate;
+            EmployeeTypeId = employeeTypeId.HasValue ? employeeTypeId.Value : null;
+            EmployeeTypeName = employeeTypeName;
+            DepartmentId = departmentId;
+            DepartmentName = departmentName;
+            DesignationId = designationId;
+            DesignationName = designationName;
+            ManagerId = managerId;
+            ManagerName = managerName;
+            AddressLine1 = addressLine1;
+            AddressLine2 = addressLine2;
+            City = city;
+            State = state;
+            Country = country;
+            Pin = pin;
+            ListEmployeesBankResponse = listEmployeesBankResponse ?? new List<EmployeesBankResponse>();
+            EmployeesSalaryStructures = employeesSalaryStructures;
+            ListEmployeeSalaryComponentsResponse = listEmployeeSalaryComponentsResponse ?? new List<EmployeeSalaryComponentsResponse>();
+        }
     } // EmployeesMainResponse...
 
     public class EmployeesBankResponse
@@ -43,7 +160,7 @@ namespace Domain.EmployeesManagement
         public string BankName { get; set; } = string.Empty;
         public int BranchId {  get; set; }
         public string BranchName { get; set; } = string.Empty;
-        public string IFSCCode { get; set; } = string.Empty;
+        public string IFSCCode { get;  set; } = string.Empty;
         public string AccountHolderName {  get; set; } = string.Empty;
         public string AccountNo {  get; set; } = string.Empty;
     } // EmployeesBankResponse...
@@ -68,10 +185,4 @@ namespace Domain.EmployeesManagement
         public string? Formula {  get; set; } = string.Empty;
         public decimal Amount {  get; set; } = decimal.Zero;
     } // EmployeeSalaryComponentsResponse...
-
-    public class FormulaRequestDTO
-    {
-        public List<EmployeeSalaryComponentsResponse> ListEmployeeSalaryComponentsResponse {  get; set; } = new List<EmployeeSalaryComponentsResponse>();
-        public EmployeeSalaryComponentsResponse employeeSalaryComponents { set; get; } = new EmployeeSalaryComponentsResponse();
-    } // FormulaRequestDTO...
 }
