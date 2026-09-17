@@ -3,6 +3,7 @@ using Application.Repository.Bank;
 using Application.Repository.Company;
 using Application.Repository.Department;
 using Application.Repository.Designation;
+using Application.Repository.EmployeesManagement;
 using Application.Repository.SalaryComponent;
 using Application.Repository.User;
 using Domain.Common;
@@ -113,6 +114,9 @@ namespace Infrastructure.Common
             services.AddScoped<ICompany, Infrastructure.Repository.Company.NCompany.DALClass>();
             services.AddScoped<CompanyService>();
             services.Configure<JWTOptionsClass>(configuration.GetSection("JWT"));
+
+            services.AddScoped<IEmployeesManagement, Infrastructure.Repository.EmployeesManagement.DALClass>();
+            services.AddScoped<Application.Repository.EmployeesManagement.EmployeesManagementService>();
         } // AddDependency...
     } // class...
 }

@@ -44,10 +44,6 @@ namespace Domain.EmployeesManagement
         {
             List<string> errors = new List<string>();
             /******************************************************************** business rules ***********************************************************************/
-            if(string.IsNullOrWhiteSpace(employeeCode))
-            {
-                errors.Add("Employee Code cannot be blank.");
-            }
             if (string.IsNullOrWhiteSpace(employeeName))
             {
                 errors.Add("Employee Name cannot be blank.");
@@ -64,19 +60,19 @@ namespace Domain.EmployeesManagement
             {
                 errors.Add("Gender is missing.");
             }
-            if(DateOnly.TryParseExact(hireDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date2))
+            if(!DateOnly.TryParseExact(hireDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var date2))
             {
                 errors.Add("Invalid value for \'Date of Joining\'");
             }
-            if(!employeeTypeId.HasValue)
+            if(!employeeTypeId.HasValue || employeeTypeId == 0)
             {
                 errors.Add("Specify an employee type.");
             }
-            if(!designationId.HasValue)
+            if(!designationId.HasValue || designationId == 0)
             {
                 errors.Add("Designation cannot be blank.");
             }
-            if(!departmentId.HasValue)
+            if(!departmentId.HasValue || departmentId == 0)
             {
                 errors.Add("Department cannot be blank.");
             }
@@ -97,7 +93,38 @@ namespace Domain.EmployeesManagement
                     {
                         errors.Add("Account No. cannot be blank.");
                     }
+                    break;
                 } // foreach loop...
+
+                bool hasDuplicateBanks = (from x in listEmployeesBankResponse
+                 group new { x } by
+                 new { x.BankId } into bankGrp
+                 select new
+                 {
+                     BankId = bankGrp.Key.BankId,
+                     CountBanks = bankGrp.Count()
+                 }).Any(m => m.CountBanks > 1);
+
+                if(hasDuplicateBanks)
+                {
+                    errors.Add("Duplicate bank entry not allowed.");
+                }
+
+                bool hasDuplicateBranches = (from x in listEmployeesBankResponse
+                 group new { x } by new
+                 {
+                     BranchId = x.BranchId,
+                 } into branchGrp
+                 select new
+                 {
+                     BranchId = branchGrp.Key.BranchId,
+                     CountBranches = branchGrp.Count()
+                 }).Any(m => m.CountBranches > 1);
+
+                if (hasDuplicateBranches)
+                {
+                    errors.Add("Duplicate branch entry not allowed.");
+                }
             } // end if...
 
             if(listEmployeeSalaryComponentsResponse != null && listEmployeeSalaryComponentsResponse.Count() > 0)
@@ -113,6 +140,22 @@ namespace Domain.EmployeesManagement
                         errors.Add("Invalid component amount. Enter a valid amount.");
                     }
                 } // foreach loop...
+            } // end if...
+
+            if(listEmployeeSalaryComponentsResponse != null && listEmployeeSalaryComponentsResponse.Count() > 0)
+            {
+                bool hasDuplicateComponents = (from comp in listEmployeeSalaryComponentsResponse
+                 group new { comp } by new { ComponentId = comp.ComponentId } into compGrp
+                 select new
+                 {
+                     ComponentId = compGrp.Key.ComponentId,
+                     CountComponents = compGrp.Count()
+                 }).Any(x => x.CountComponents > 1);
+
+                if (hasDuplicateComponents)
+                {
+                    errors.Add("Duplicate Component entry not allowed.");
+                }
             } // end if...
 
             if(errors.Any())

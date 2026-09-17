@@ -38,5 +38,12 @@ namespace Application.Repository.Company
             var dto = mapper.Map<CompanyDTO>(company);
             return dto;
         } // GetCompanyFinYearByCompanyIdFinYearId...
+
+        public async Task<CompanyDTO> GetCompanyByCompanyId(int companyId)
+        {
+            var companyResponse = await ic.GetCompanyByCompanyId(companyId);
+            var dto = mapper.Map<CompanyDTO>(companyResponse);
+            return dto;
+        } // GetCompanyByCompanyId...
     } // class...
 }

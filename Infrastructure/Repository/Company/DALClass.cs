@@ -46,6 +46,32 @@ namespace Infrastructure.Repository.Company
 
                 return companyResponse;
             } // GetCompanyFinYearByCompanyIdFinYearId...
+
+            public async Task<CompanyResponse> GetCompanyByCompanyId(int companyId)
+            {
+                var years = await GetFinYearsByCompanyId(companyId);
+                var company = await context.Companies.Where(m => m.CompanyId == companyId).Select(x => new
+                {
+                    CompanyId = x.CompanyId,
+                    CompanyCode = x.CompanyCode,
+                    CompanyName = x.CompanyName,
+                    GSTIN = x.Gstin ?? string.Empty,
+                    RegNo = x.RegistrationNo,
+                    Address1 = x.Address1,
+                    Address2 = x.Address2,
+                    City = x.City,
+                    State = x.State,
+                    Country = x.Country,
+                    Pin = x.Pin,
+                    CurrencyCode = x.CurrencyCode
+                }).FirstOrDefaultAsync();
+
+                var CompanyResponse = new CompanyResponse(company!.CompanyId, company!.CompanyCode, company!.CompanyName, company!.GSTIN, company!.RegNo ?? string.Empty, 
+                    company!.Address1 ?? string.Empty, company!.Address2 ?? string.Empty, company!.City ?? string.Empty, company!.State ?? string.Empty, 
+                    company!.Country ?? string.Empty, company!.Pin ?? string.Empty, company!.CurrencyCode ?? string.Empty, years, "GET");
+
+                return CompanyResponse;
+            } // GetCompanyByCompanyId...
         } // class...
     } // namespace NCompany..
 }

@@ -15,7 +15,7 @@ namespace Payroll.Handlers
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
-            logger.LogError("An unhandled exception occured.");
+            logger.LogError(exception, "An unhandled exception occured.");
 
             switch (exception)
             {

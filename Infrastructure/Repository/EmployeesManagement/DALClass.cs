@@ -1,4 +1,5 @@
-﻿using Application.Repository.EmployeesManagement;
+﻿using Application.Repository.Company;
+using Application.Repository.EmployeesManagement;
 using Domain.EmployeesManagement;
 using Infrastructure.Models;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +12,12 @@ namespace Infrastructure.Repository.EmployeesManagement
     internal sealed class DALClass : IEmployeesManagement
     {
         private readonly PayrollContext context;
+        private readonly ICompany ic;
 
-        public DALClass(PayrollContext context)
+        public DALClass(PayrollContext context, ICompany ic)
         {
             this.context = context;
+            this.ic = ic;
         } // constructor...
 
         public async Task<List<EmployeesMainResponse>> GetEmployees()
@@ -126,9 +129,231 @@ namespace Infrastructure.Repository.EmployeesManagement
             return employee!;
         } // GetEmployeeByEmployeeId...
 
-        public Task Save(EmployeesMainResponse response)
+        private async Task<string> CreateEmployeeCode(int companyId)
         {
-            throw new NotImplementedException();
-        }
+            string employeeCode = string.Empty;
+            var companyResponse = await ic.GetCompanyByCompanyId(companyId);
+            string compCode = companyResponse.CompanyCode;
+
+            var countEmployees = context.Employees.Count(x =>  x.CompanyId == companyId);
+            if(countEmployees == 0)
+            {
+                employeeCode = compCode + "000001";
+            }
+            else
+            {
+                int maxno = ((context.Employees.Max(x => Convert.ToInt32(employeeCode.Substring(4))) + 1) + 1);
+                if(maxno.ToString().Length == 1)
+                {
+                    employeeCode = compCode + "00000" + maxno.ToString();
+                }
+                else if(maxno.ToString().Length == 2)
+                {
+                    employeeCode = compCode + "0000" + maxno.ToString();
+                }
+                else if (maxno.ToString().Length == 3)
+                {
+                    employeeCode = compCode + "000" + maxno.ToString();
+                }
+                else if (maxno.ToString().Length == 4)
+                {
+                    employeeCode = compCode + "00" + maxno.ToString();
+                }
+                else if (maxno.ToString().Length == 5)
+                {
+                    employeeCode = compCode + "0" + maxno.ToString();
+                }
+                else if (maxno.ToString().Length == 6)
+                {
+                    employeeCode = compCode + maxno.ToString();
+                }
+            } // end if...
+
+            return employeeCode;
+        } // CreateEmployeeCode...
+
+        private async Task CreateEmployee(EmployeesMainResponse response)
+        {
+            Employee employee = new Employee();
+            employee.CompanyId = response.CompanyId;
+            employee.EmployeeCode = await CreateEmployeeCode(response.CompanyId);
+            employee.EmployeeName = response.EmployeeName;
+            employee.DateOfBirty = DateTime.ParseExact(response.DOB, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            employee.Gender = response.Gender;
+            employee.Email = response.Email;
+            employee.Phone = response.Phone;
+            employee.HireDate = DateTime.ParseExact(response.HireDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            employee.TerminationDate = string.IsNullOrWhiteSpace(response.TerminationDate) ? null :
+                                DateTime.ParseExact(response.TerminationDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            employee.EmployeeTypeId = (int)response.EmployeeTypeId!;
+            employee.IsActive = "Yes";
+            employee.DepartmentId = response.DepartmentId;
+            employee.DesignationId = response.DesignationId;
+            employee.ManagerId = response.ManagerId.HasValue ? response.ManagerId : null;
+            employee.AddressLine1 = response.AddressLine1;
+            employee.AddressLine2 = response.AddressLine2;
+            employee.City = response.City;
+            employee.State = response.State;
+            employee.Country = response.Country;
+            employee.PostalCode = response.Pin;
+            await context.Employees.AddAsync(employee);
+            await context.SaveChangesAsync();
+
+            if(response.ListEmployeesBankResponse != null && response.ListEmployeesBankResponse.Count() > 0)
+            {
+                foreach(var data in response.ListEmployeesBankResponse)
+                {
+                    EmployeeBankAccount bank = new EmployeeBankAccount();
+                    bank.CompanyId = response.CompanyId;
+                    bank.EmployeeId = employee.EmployeeId;
+                    bank.BankId = data.BankId;
+                    bank.BranchId = data.BranchId;
+                    bank.AccountHolderName = data.AccountHolderName ?? string.Empty;
+                    bank.AccountNo = data.AccountNo;
+                    await context.EmployeeBankAccounts.AddAsync(bank);
+                }
+                await context.SaveChangesAsync();
+            } // end if...
+
+            EmployeeSalaryStructure structure = new EmployeeSalaryStructure();
+            structure.CompanyId = response.CompanyId;
+            structure.EmployeeId = employee.EmployeeId;
+            structure.EffectiveFrom = string.IsNullOrWhiteSpace(response.EmployeesSalaryStructures.EffectiveFrom) ? null :
+                                DateTime.ParseExact(response.EmployeesSalaryStructures.EffectiveFrom, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            structure.EffectiveTo = string.IsNullOrWhiteSpace(response.EmployeesSalaryStructures.EffectiveTo) ? null :
+                                DateTime.ParseExact(response.EmployeesSalaryStructures.EffectiveTo, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            structure.PayFrequency = string.IsNullOrWhiteSpace(response.EmployeesSalaryStructures.PayFrequency) ? "MONTHLY" : response.EmployeesSalaryStructures.PayFrequency;
+            structure.AnnualCtc = response.EmployeesSalaryStructures.AnnualCTC;
+            structure.Basic = response.EmployeesSalaryStructures.Basic ?? decimal.Zero;
+            structure.IsActive = "Yes";
+            await context.EmployeeSalaryStructures.AddAsync(structure);
+            await context.SaveChangesAsync();
+
+            if(response.ListEmployeeSalaryComponentsResponse != null && response.ListEmployeeSalaryComponentsResponse.Count() > 0)
+            {
+                foreach(var data in response.ListEmployeeSalaryComponentsResponse)
+                {
+                    EmployeeSalaryComponent component = new EmployeeSalaryComponent();
+                    component.CompanyId = response.CompanyId;
+                    component.EmployeeId = employee.EmployeeId;
+                    component.ComponentId = data.ComponentId;
+                    component.Formula = data.Formula ?? string.Empty;
+                    component.Amount = data.Amount;
+                    await context.EmployeeSalaryComponents.AddAsync(component);
+                }
+                await context.SaveChangesAsync();
+            } // end if...
+        } // CreateEmployee...
+
+        private async Task UpdateEmployee(EmployeesMainResponse response)
+        {
+            var existingEmployee = await context.Employees.FirstOrDefaultAsync(m => m.EmployeeId == response.EmployeeId);
+            existingEmployee!.EmployeeName = response.EmployeeName;
+            existingEmployee.DateOfBirty = DateTime.ParseExact(response.DOB, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            existingEmployee.Gender = response.Gender;
+            existingEmployee.Email = response.Email;
+            existingEmployee.Phone = response.Phone;
+            existingEmployee.HireDate = DateTime.ParseExact(response.HireDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            existingEmployee.TerminationDate = string.IsNullOrWhiteSpace(response.TerminationDate) ? null :
+                    DateTime.ParseExact(response.TerminationDate, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            existingEmployee.EmployeeTypeId = (int)response.EmployeeTypeId!;
+            existingEmployee.DepartmentId = response.DepartmentId;
+            existingEmployee.DesignationId = response.DesignationId;
+            existingEmployee.ManagerId = response.ManagerId.HasValue ? response.ManagerId : null;
+            existingEmployee.AddressLine1 = response.AddressLine1;
+            existingEmployee.AddressLine2 = response.AddressLine2;
+            existingEmployee.City = response.City;
+            existingEmployee.State = response.State;
+            existingEmployee.Country = response.Country;
+            existingEmployee.PostalCode = response.Pin;
+            context.Update(existingEmployee);
+            await context.SaveChangesAsync();
+
+            if (response.ListEmployeesBankResponse != null && response.ListEmployeesBankResponse.Count() > 0)
+            {
+                foreach (var data in response.ListEmployeesBankResponse)
+                {
+                    if (data.AccountId == 0)
+                    {
+                        EmployeeBankAccount bank = new EmployeeBankAccount();
+                        bank.CompanyId = response.CompanyId;
+                        bank.EmployeeId = existingEmployee.EmployeeId;
+                        bank.BankId = data.BankId;
+                        bank.BranchId = data.BranchId;
+                        bank.AccountHolderName = data.AccountHolderName ?? string.Empty;
+                        bank.AccountNo = data.AccountNo;
+                        await context.EmployeeBankAccounts.AddAsync(bank);
+                    }
+                    else
+                    {
+                        var existingAccount = await context.EmployeeBankAccounts.FirstOrDefaultAsync(x => x.AccountId == data.AccountId);
+                        existingAccount!.BankId = data.BankId;
+                        existingAccount.BranchId = data.BranchId;
+                        existingAccount.AccountHolderName = data.AccountHolderName ?? string.Empty;
+                        existingAccount.AccountNo = data.AccountNo;
+                        context.Update(existingAccount);
+                    }
+                } // end of foreach loop...
+                await context.SaveChangesAsync();
+            } // end if...
+
+            var existingStructure = await context.EmployeeSalaryStructures.FirstOrDefaultAsync(m => m.StructureId == response.EmployeesSalaryStructures.StructureId);
+            existingStructure!.EffectiveFrom = string.IsNullOrWhiteSpace(response.EmployeesSalaryStructures.EffectiveFrom) ? null :
+                                DateTime.ParseExact(response.EmployeesSalaryStructures.EffectiveFrom, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            existingStructure.EffectiveTo = string.IsNullOrWhiteSpace(response.EmployeesSalaryStructures.EffectiveTo) ? null :
+                                DateTime.ParseExact(response.EmployeesSalaryStructures.EffectiveTo, "dd/MM/yyyy", System.Globalization.CultureInfo.InvariantCulture);
+            existingStructure.PayFrequency = response.EmployeesSalaryStructures.PayFrequency ?? "MONTHLY";
+            existingStructure.AnnualCtc = response.EmployeesSalaryStructures.AnnualCTC;
+            existingStructure.Basic = response.EmployeesSalaryStructures.Basic ?? decimal.Zero;
+            await context.EmployeeSalaryStructures.AddAsync(existingStructure);
+            await context.SaveChangesAsync();
+
+            if (response.ListEmployeeSalaryComponentsResponse != null && response.ListEmployeeSalaryComponentsResponse.Count() > 0)
+            {
+                var components = await context.EmployeeSalaryComponents.Where(m => m.EmployeeId == response.EmployeeId).ToListAsync();
+                context.EmployeeSalaryComponents.RemoveRange(components);
+                await context.SaveChangesAsync();
+
+                foreach (var data in response.ListEmployeeSalaryComponentsResponse)
+                {
+                    EmployeeSalaryComponent component = new EmployeeSalaryComponent();
+                    component.CompanyId = response.CompanyId;
+                    component.EmployeeId = existingEmployee.EmployeeId;
+                    component.ComponentId = data.ComponentId;
+                    component.Formula = data.Formula ?? string.Empty;
+                    component.Amount = data.Amount;
+                    await context.EmployeeSalaryComponents.AddAsync(component);
+                }
+                await context.SaveChangesAsync();
+            } // end if...
+        } // UpdateEmployee...
+
+        public async Task Save(EmployeesMainResponse response)
+        {
+            var trans = await context.Database.BeginTransactionAsync();
+
+            try
+            {
+                if(response.EmployeeId == 0)
+                {
+                    await CreateEmployee(response);
+                }
+                else
+                {
+                    await UpdateEmployee(response);
+                }
+
+                await trans.CommitAsync();
+            }
+            catch (Exception ex)
+            {
+                await trans.RollbackAsync();
+                throw;
+            }
+            finally
+            {
+                trans.Dispose();
+            }
+        } // Save...
     } // class...
 }

@@ -23,6 +23,13 @@ namespace Payroll.Controllers
             return Ok(companies);
         } // GetAllCompanies...
 
+        [HttpGet("{companyId:int}")]
+        public async Task<IActionResult> GetCompanyByCompanyId(int companyId)
+        {
+            var companyDTO = await service.GetCompanyByCompanyId(companyId);
+            return Ok(companyDTO);
+        } // GetCompanyByCompanyId...
+
         [HttpGet("GetFinYearsByCompanyId/{companyId:int}")]
         public async Task<IActionResult> GetFinYearsByCompanyId(int companyId)
         {

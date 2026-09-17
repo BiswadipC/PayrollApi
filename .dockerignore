@@ -1,0 +1,16 @@
+bin/
+obj/
+.vs/
+.git/
+.github/
+
+**/bin/
+**/obj/
+
+*.user
+*.suo
+
+appsettings.Development.json
+
+Dockerfile
+.dockerignore

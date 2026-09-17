@@ -10,5 +10,6 @@ namespace Application.Repository.Company
         Task<List<CompanyResponse>> GetAllCompanies();
         Task<List<FinYearResponse>> GetFinYearsByCompanyId(int companyId);
         Task<CompanyResponse> GetCompanyFinYearByCompanyIdFinYearId(int companyId, int finYearId);
+        Task<CompanyResponse> GetCompanyByCompanyId(int companyId);
     } // interface...
 }
